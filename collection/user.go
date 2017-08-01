@@ -1,17 +1,31 @@
 package collection
 
-import(
+import (
+	"errors"
+
 	"github.com/HouzuoGuo/tiedot/db"
 )
 
 type User struct {
-	user string
+	user  string
 	group string
 }
 
+func CreateUser(userName string, groupName string) error {
+	if _, err := getUserInfo(userName); err == nil {
+		return errors.New("user is exist.")
+	}
+	createUser(userName, groupName)
+	return nil
+}
+
 func createUser(userName string, groupName string) *db.Col {
-	user := halphasDB.Use("User")
+	user := halphasDB.Use(USER_COLLECTION)
 	user.Insert(map[string]interface{}{"User": userName, "Group": groupName})
 	return user
 }
 
+func getUserInfo(name string) (map[string]interface{}, error) {
+	user := halphasDB.Use(USER_COLLECTION)
+	return simpleQuery(name, "User", user)
+}
