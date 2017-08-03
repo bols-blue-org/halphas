@@ -20,12 +20,12 @@ func CreateUser(userName string, groupName string) error {
 }
 
 func createUser(userName string, groupName string) *db.Col {
-	user := halphasDB.Use(USER_COLLECTION)
+	user := halphasDB.Use(AppUserCollection)
 	user.Insert(map[string]interface{}{"User": userName, "Group": groupName})
 	return user
 }
 
 func getUserInfo(name string) (map[string]interface{}, error) {
-	user := halphasDB.Use(USER_COLLECTION)
+	user := halphasDB.Use(AppUserCollection)
 	return simpleQuery(name, "User", user)
 }

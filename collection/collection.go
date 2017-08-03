@@ -12,7 +12,7 @@ type TiedotCollection struct {
 	col        *db.Col
 	user       string
 	group      string
-	parmission int
+	permission int
 }
 
 type Collection interface {
@@ -24,6 +24,33 @@ type Collection interface {
 	Unindex([]string) error
 	Read(int) (map[string]interface{}, error)
 	EvalQuery(query interface{}, queryResult *map[int]struct{}) error
+}
+
+func canReadPermission(tc TiedotCollection, metaData map[string]interface{}) bool {
+	if tc.group == "admin" {
+		return true
+	}
+
+	switch tc.permission & ReadFlag {
+	case ReadUser:
+		userStr, ok := metaData["User"].(string)
+		if !ok {
+			log.Println("type assert miss")
+			return false
+		}
+		return tc.user == userStr
+	case ReadGroup:
+		groupStr, ok := metaData["Group"].(string)
+		if !ok {
+			log.Println("type assert miss")
+			return false
+		}
+		return tc.group == groupStr
+	case ReadAll:
+		return true
+	default:
+		return false
+	}
 }
 
 func (tie *TiedotCollection) Print() {
