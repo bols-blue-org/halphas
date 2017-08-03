@@ -61,19 +61,22 @@ func getCollectionSetting(name string) (map[string]interface{}, error) {
 func UseCollection(name string, user string) Collection {
 	tmp := halphasDB.Use(name)
 	setting, err := getCollectionSetting(name)
-	pms := 0x10000
+	var pms float64
+	var ok bool
 	if err != nil {
 		log.Printf("%v", err)
 	} else {
-		log.Printf("%v", setting)
-		pms, _ = setting["Permission"].(int)
+		pms, ok = setting["Permission"].(float64)
+		if !ok {
+			log.Printf("assertion error")
+		}
 	}
 	info, err := getUserInfo(user)
 	if err != nil {
 		log.Printf("%v", err)
 	}
 
-	return &TiedotCollection{col: tmp, user: info["User"].(string), group: info["Group"].(string), permission: pms}
+	return &TiedotCollection{col: tmp, user: info["User"].(string), group: info["Group"].(string), permission: (int)(pms)}
 }
 
 func Close() error {

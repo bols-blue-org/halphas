@@ -2,6 +2,7 @@ package collection
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 
@@ -79,7 +80,19 @@ func (tie *TiedotCollection) Unindex(list []string) error {
 }
 
 func (tie *TiedotCollection) Read(id int) (map[string]interface{}, error) {
-	return tie.col.Read(id)
+	data, err := tie.col.Read(id)
+	if err != nil {
+		return data, err
+	}
+	assert, ok := data["MetaData"].(map[string]interface{})
+	if !ok {
+		return nil, errors.New("can't type assertion")
+	}
+
+	if !canReadPermission(*tie, assert) {
+		return nil, errors.New("can't access permission.")
+	}
+	return data, err
 }
 
 func (tie *TiedotCollection) EvalQuery(orgQuery interface{}, queryResult *map[int]struct{}) error {
